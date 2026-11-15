@@ -53,7 +53,7 @@ $lastname = $_SESSION['lastname'];
                     <th>Status</th>
                     <th>Created By</th>
                     <th>Assigned To</th>
-                    <th>Created At</th>
+                    <th>Created</th>
                 </tr>
             </thead>
        
