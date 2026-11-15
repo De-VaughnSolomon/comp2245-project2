@@ -83,6 +83,7 @@ try {
                 <?php echo htmlspecialchars($error); ?>
             </div>
         <?php endif; ?>
+        <div class="login-form">
         <form method="POST" action="login.php">
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required>
@@ -92,7 +93,7 @@ try {
             <br>
             <button type="submit">Log In</button>
         </form>
-
+        </div>
 
     
 </body>
