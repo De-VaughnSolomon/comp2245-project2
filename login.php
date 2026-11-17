@@ -1,6 +1,8 @@
 <?php
 session_start();
 
+$error = "";
+
 if (isset($_SESSION['user_id'])) {
     // User is already logged in, redirect to ticket list
     header('Location: index.php');
@@ -9,9 +11,9 @@ if (isset($_SESSION['user_id'])) {
 
 try {
     $pdo = new PDO(
-        'mysql:host=localhost;port=3306;dbname=database_name;charset=utf8mb4',
-        null,
-        null,
+        'mysql:host=localhost;port=3306;dbname=helpdesk;charset=utf8mb4',
+        'comp2245',
+        'comp2245-demo',
         [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -22,18 +24,17 @@ try {
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
 
-        // Fetch user from database
-        $email = filter_var($email, FILTER_SANITIZE_EMAIL);
-        $password = filter_var($password, FILTER_SANITIZE_STRING);
-
+      
            if ($email !== "" && $password !== "") {
 
             // Find the user by email
-            $sql = "SELECT * FROM users WHERE email = ?";
+            $sql = "SELECT id, firstname, lastname, email, password, role
+                    FROM users WHERE email = ?";
+
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$email]);
 
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            $user = $stmt->fetch();
 
             // Verify the password
             if ($user && password_verify($password, $user["password"])) {
