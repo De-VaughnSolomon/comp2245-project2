@@ -6,7 +6,9 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
-
+function e($value) {
+    return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
+}
 $user_id = (int) $_SESSION['user_id'];
 $role = $_SESSION['role'] ?? 'member';
 
@@ -361,6 +363,7 @@ try {
 function escape($value) {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
+require_once 'includes/header.php';
 ?>
 
 <!DOCTYPE html>
@@ -558,4 +561,5 @@ function escape($value) {
     </script>
 
 </body>
+<?php include 'includes/footer.php'; ?>
 </html>

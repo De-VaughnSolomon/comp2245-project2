@@ -6,7 +6,9 @@ if (!isset($_SESSION["user_id"])) {
     header("Location: login.php");
     exit;
 }
-
+function e($value) {
+    return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
+}
 // Get ticket ID
 $id = $_GET["id"] ?? "";
 
@@ -152,6 +154,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
     }
 }
+require_once 'includes/header.php';
 ?>
 
 <!DOCTYPE html>
@@ -260,4 +263,5 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </main>
 
 </body>
+<?php include 'includes/footer.php'; ?>
 </html>

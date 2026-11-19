@@ -6,7 +6,10 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
-
+// Escape output safely
+function e($value) {
+    return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
+}
 $user_id = (int) $_SESSION['user_id'];
 $firstname = $_SESSION['firstname'];
 $lastname = $_SESSION['lastname'];
@@ -74,7 +77,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'tickets') {
     }
 
     exit;
+
 }
+
+require_once 'includes/header.php';
 ?>
 
 <!DOCTYPE html>
@@ -151,4 +157,5 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'tickets') {
     </div>
 
 </body>
+<?php include 'includes/footer.php'; ?>
 </html>

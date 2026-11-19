@@ -6,7 +6,9 @@ if (!isset($_SESSION["user_id"])) {
     header("Location: login.php");
     exit;
 }
-
+function e($value) {
+    return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
+}
 try {
     $pdo = new PDO(
         "mysql:host=localhost;port=3306;dbname=helpdesk;charset=utf8mb4",
@@ -127,6 +129,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 function h($value) {
     return htmlspecialchars($value, ENT_QUOTES, "UTF-8");
 }
+require_once 'includes/header.php';
 ?>
 
 
@@ -238,4 +241,5 @@ function h($value) {
 
 </main>
 </body>
+<?php include 'includes/footer.php'; ?>
 </html>
