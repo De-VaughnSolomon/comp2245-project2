@@ -34,8 +34,10 @@ $assignedToMe = (int) ($ticket['assigned_to'] ?? 0) === $userId;
 $pageTitle = 'Ticket Details';
 require __DIR__ . '/includes/header.php';
 ?>
-<a href="index.php">Back to Tickets</a>
-<p><a href="ticket-edit.php?id=<?= e($ticketId) ?>">Edit Ticket</a></p>
+<div class="ticket-actions">
+    <a href="index.php" class="ticket-nav back-button">Back to Tickets</a>
+    <a href="ticket-edit.php?id=<?= e($ticketId) ?>" class="ticket-nav edit-button">Edit Ticket</a>
+</div>
 <div class="ticket-details">
     <h2><?= e($ticket['title']) ?></h2>
     <p><strong>Description:</strong></p>
