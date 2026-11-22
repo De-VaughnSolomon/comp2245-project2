@@ -250,45 +250,68 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+   
     // ADD NOTE
     const noteForm = document.getElementById("note-form");
 
     if (noteForm) {
 
+        let submittingNote = false;
+
         noteForm.addEventListener("submit", async function (event) {
 
             event.preventDefault();
 
+            if (submittingNote) {
+                return;
+            }
+
             const noteBody = document.getElementById("note-body");
             const noteMessage = document.getElementById("note-message");
+            const submitButton = noteForm.querySelector("button");
 
             const body = noteBody.value.trim();
 
-            // Do not allow empty notes
             if (body === "") {
-
                 noteMessage.textContent = "Please enter a note.";
                 return;
-
             }
 
-            const submitButton = noteForm.querySelector("button");
-
+            submittingNote = true;
             submitButton.disabled = true;
 
             noteMessage.textContent = "Adding note...";
 
             try {
 
-                const result = await sendRequest("note", {
-                    body: body
+                const response = await fetch("api/notes.php", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": csrfToken
+                    },
+
+                    body: JSON.stringify({
+                        ticket_id: ticketId,
+                        body: body
+                    })
+
                 });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        result.error || "Could not add note."
+                    );
+                }
 
                 const note = result.note;
 
                 const notesList = document.getElementById("notes-list");
 
-                // Remove No notes yet message
                 const noNotes = document.getElementById("no-notes");
 
                 if (noNotes) {
@@ -300,9 +323,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 noteDiv.className = "note";
 
                 const author = document.createElement("strong");
-
-                author.textContent =
-                    note.firstname + " " + note.lastname;
+                author.textContent = note.author_name;
 
                 const authorParagraph = document.createElement("p");
                 authorParagraph.appendChild(author);
@@ -317,10 +338,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 noteDiv.appendChild(bodyParagraph);
                 noteDiv.appendChild(date);
 
-                // Add note to bottom
                 notesList.appendChild(noteDiv);
 
-                // Clear textarea
                 noteBody.value = "";
 
                 noteMessage.textContent = "Note added.";
@@ -331,12 +350,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
             } finally {
 
+                submittingNote = false;
                 submitButton.disabled = false;
 
             }
 
         });
+
     }
+
 
     // DELETE CONFIRMATION
     const deleteButton = document.getElementById("delete-button");

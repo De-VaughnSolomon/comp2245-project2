@@ -88,56 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        // ADD NOTE
-        if ($action === 'note') {
-
-            $body = trim($data['body'] ?? '');
-
-            if ($body === '') {
-                http_response_code(400);
-                echo json_encode([
-                    'message' => 'Please enter a note.'
-                ]);
-                exit;
-            }
-
-            $stmt = $pdo->prepare("
-                INSERT INTO notes
-                    (ticket_id, body, created_by, created_at)
-                VALUES
-                    (:ticket_id, :body, :user_id, NOW())
-            ");
-
-            $stmt->execute([
-                'ticket_id' => $ticket_id,
-                'body' => $body,
-                'user_id' => $user_id
-            ]);
-
-            $note_id = $pdo->lastInsertId();
-
-            // Get note and author
-            $stmt = $pdo->prepare("
-                SELECT
-                    n.id,
-                    n.body,
-                    n.created_at,
-                    u.firstname,
-                    u.lastname
-                FROM notes n
-                INNER JOIN users u ON n.created_by = u.id
-                WHERE n.id = :id
-            ");
-
-            $stmt->execute(['id' => $note_id]);
-
-            echo json_encode([
-                'message' => 'Note added.',
-                'note' => $stmt->fetch(PDO::FETCH_ASSOC)
-            ]);
-
-            exit;
-        }
+       
 
         // CHANGE STATUS
         if ($action === 'status') {
@@ -378,7 +329,7 @@ require_once 'includes/header.php';
 
     <link rel="stylesheet" href="styles.css">
 
-    <script src="app.js" defer></script>
+    
 </head>
 
 <body>

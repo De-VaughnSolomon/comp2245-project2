@@ -16,7 +16,7 @@ $user = $_SESSION['user'] ?? null;
 
     <title><?= e($pageTitle) ?> | Fix-It Desk</title>
 
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/styles.css">
 
     <meta name="csrf-token"
           content="<?= e($_SESSION['csrf_token'] ?? '') ?>">
