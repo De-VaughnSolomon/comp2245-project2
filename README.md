@@ -4,3 +4,4 @@
 | Zoe James | zmjames23-star | Database script (schema.sql) |
 | DeVaughn Solomon | De-VaughnSolomon | Login, logout and the users page |
 | Renael Alfred| Renael758 |CSS                |
+| Trevorn Williams| TrevornWil | API                |
