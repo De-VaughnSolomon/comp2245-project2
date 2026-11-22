@@ -1,40 +1,6 @@
-
 <?php
-session_start();
-
-// Check if the user is logged in
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit;
-}
-function e($value) {
-    return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
-}
-// Only admins can access this page
-if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
-    http_response_code(403);
-    ?>
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>403 Forbidden</title>
-    </head>
-    <body>
-        <h1>403 - Forbidden</h1>
-        <p>You do not have permission to access this page.</p>
-        <a href="index.php">Back to Tickets</a>
-    </body>
-    </html>
-    <?php
-    exit;
-}
-
-// Create CSRF token
-if (!isset($_SESSION["csrf_token"])) {
-    $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
-}
+require_once __DIR__ . '/includes/bootstrap.php';
+requireAdmin();
 
 $error = "";
 $success = "";
@@ -45,26 +11,13 @@ $email = "";
 $role = "member";
 
 try {
-
-    // Connect to database
-    $pdo = new PDO(
-        "mysql:host=localhost;port=3306;dbname=helpdesk;charset=utf8mb4",
-        "comp2245",
-        "comp2245-demo"
-    );
-
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
     // Add a new user
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         // Check CSRF token
         $csrf_token = $_POST["csrf_token"] ?? "";
 
-        if (
-            !isset($_SESSION["csrf_token"]) ||
-            !hash_equals($_SESSION["csrf_token"], $csrf_token)
-        ) {
+        if (!verifyCsrfToken($csrf_token)) {
             $error = "Invalid security token. Please try again.";
         } else {
 
@@ -168,24 +121,20 @@ try {
 }
 
 // Escape output
-function h($value) {
-    return htmlspecialchars((string) $value, ENT_QUOTES, "UTF-8");
-}
-include 'includes/header.php';
+$pageTitle = 'Manage Users';
+require __DIR__ . '/includes/header.php';
 ?>
 
-<main>
-
-    <div class="card">
+<div class="card">
 
         <h2>Add a User</h2>
 
         <?php if ($error !== ""): ?>
-            <p class="error"><?php echo h($error); ?></p>
+            <p class="error"><?php echo e($error); ?></p>
         <?php endif; ?>
 
         <?php if ($success !== ""): ?>
-            <p class="success"><?php echo h($success); ?></p>
+            <p class="success"><?php echo e($success); ?></p>
         <?php endif; ?>
 
         <form method="POST" action="users.php">
@@ -193,7 +142,7 @@ include 'includes/header.php';
             <input
                 type="hidden"
                 name="csrf_token"
-                value="<?php echo h($_SESSION["csrf_token"]); ?>"
+                value="<?php echo e($_SESSION["csrf_token"]); ?>"
             >
 
             <label for="firstname">First Name</label>
@@ -201,7 +150,7 @@ include 'includes/header.php';
                 type="text"
                 id="firstname"
                 name="firstname"
-                value="<?php echo h($firstname); ?>"
+                value="<?php echo e($firstname); ?>"
                 required
             >
 
@@ -210,7 +159,7 @@ include 'includes/header.php';
                 type="text"
                 id="lastname"
                 name="lastname"
-                value="<?php echo h($lastname); ?>"
+                value="<?php echo e($lastname); ?>"
                 required
             >
 
@@ -219,7 +168,7 @@ include 'includes/header.php';
                 type="email"
                 id="email"
                 name="email"
-                value="<?php echo h($email); ?>"
+                value="<?php echo e($email); ?>"
                 required
             >
 
@@ -271,14 +220,14 @@ include 'includes/header.php';
 
                         <tr>
                             <td>
-                                <?php echo h($user["firstname"] . " " . $user["lastname"]); ?>
+                                <?php echo e($user["firstname"] . " " . $user["lastname"]); ?>
                             </td>
 
-                            <td><?php echo h($user["email"]); ?></td>
+                            <td><?php echo e($user["email"]); ?></td>
 
-                            <td><?php echo h($user["role"]); ?></td>
+                            <td><?php echo e($user["role"]); ?></td>
 
-                            <td><?php echo h($user["created_at"]); ?></td>
+                            <td><?php echo e($user["created_at"]); ?></td>
                         </tr>
 
                     <?php endforeach; ?>
@@ -296,8 +245,4 @@ include 'includes/header.php';
 
     </div>
 
-</main>
-
-</body>
-<?php include 'includes/footer.php'; ?>
-</html>
+<?php require __DIR__ . '/includes/footer.php'; ?>

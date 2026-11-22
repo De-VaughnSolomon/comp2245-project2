@@ -1,36 +1,8 @@
 <?php
-session_start();
-
-// Check login
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit;
-}
-function e($value) {
-    return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
-}
-try {
-    $pdo = new PDO(
-        "mysql:host=localhost;port=3306;dbname=helpdesk;charset=utf8mb4",
-        "comp2245",
-        "comp2245-demo"
-    );
-
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Get users for the assignment dropdown
-    $stmt = $pdo->query("
-        SELECT id, firstname, lastname
-        FROM users
-        ORDER BY firstname, lastname
-    ");
-
-    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-} catch (PDOException $e) {
-    error_log($e->getMessage());
-    die("Something went wrong. Please try again later.");
-}
+require_once __DIR__ . '/includes/bootstrap.php';
+requireLogin();
+$usersStmt = $pdo->query('SELECT id, firstname, lastname FROM users ORDER BY firstname, lastname');
+$users = $usersStmt->fetchAll();
 
 // Form values
 $title = "";
@@ -48,6 +20,12 @@ $errors = [
 
 // Process form
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+        http_response_code(403);
+        exit('Invalid CSRF token. Reload the page and try again.');
+    }
+
 
     $title = trim($_POST["title"] ?? "");
     $description = trim($_POST["description"] ?? "");
@@ -125,29 +103,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 
-// Escape output
-function h($value) {
-    return htmlspecialchars($value, ENT_QUOTES, "UTF-8");
-}
-require_once 'includes/header.php';
+$pageTitle = 'Create Ticket';
+require __DIR__ . '/includes/header.php';
 ?>
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <main>
 
     <div class="form-container">
 
         <h2>Create a Ticket</h2>
 
         <form method="POST" action="ticket-new.php">
+            <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION["csrf_token"]); ?>">
 
             <div class="field">
                 <label for="title">Title</label>
@@ -157,11 +122,11 @@ require_once 'includes/header.php';
                     id="title"
                     name="title"
                     maxlength="150"
-                    value="<?php echo h($title); ?>"
+                    value="<?php echo e($title); ?>"
                 >
 
                 <?php if ($errors["title"] !== ""): ?>
-                    <p class="error"><?php echo h($errors["title"]); ?></p>
+                    <p class="error"><?php echo e($errors["title"]); ?></p>
                 <?php endif; ?>
             </div>
 
@@ -171,10 +136,10 @@ require_once 'includes/header.php';
                 <textarea
                     id="description"
                     name="description"
-                ><?php echo h($description); ?></textarea>
+                ><?php echo e($description); ?></textarea>
 
                 <?php if ($errors["description"] !== ""): ?>
-                    <p class="error"><?php echo h($errors["description"]); ?></p>
+                    <p class="error"><?php echo e($errors["description"]); ?></p>
                 <?php endif; ?>
             </div>
 
@@ -198,7 +163,7 @@ require_once 'includes/header.php';
                 </select>
 
                 <?php if ($errors["priority"] !== ""): ?>
-                    <p class="error"><?php echo h($errors["priority"]); ?></p>
+                    <p class="error"><?php echo e($errors["priority"]); ?></p>
                 <?php endif; ?>
             </div>
 
@@ -212,10 +177,10 @@ require_once 'includes/header.php';
                     <?php foreach ($users as $user): ?>
 
                         <option
-                            value="<?php echo $user["id"]; ?>"
+                            value="<?php echo e($user["id"]); ?>"
                             <?php if ($assigned_to === (string) $user["id"]) echo "selected"; ?>
                         >
-                            <?php echo h($user["firstname"] . " " . $user["lastname"]); ?>
+                            <?php echo e($user["firstname"] . " " . $user["lastname"]); ?>
                         </option>
 
                     <?php endforeach; ?>
@@ -223,7 +188,7 @@ require_once 'includes/header.php';
                 </select>
 
                 <?php if ($errors["assigned_to"] !== ""): ?>
-                    <p class="error"><?php echo h($errors["assigned_to"]); ?></p>
+                    <p class="error"><?php echo e($errors["assigned_to"]); ?></p>
                 <?php endif; ?>
             </div>
 
@@ -239,7 +204,4 @@ require_once 'includes/header.php';
 
     </div>
 
-</main>
-</body>
-<?php include 'includes/footer.php'; ?>
-</html>
+<?php require __DIR__ . '/includes/footer.php'; ?>

@@ -1,60 +1,14 @@
 <?php
-session_start();
-
-// Check login
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit;
-}
-function e($value) {
-    return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
-}
-// Get ticket ID
-$id = $_GET["id"] ?? "";
-
-if (!ctype_digit((string) $id) || (int) $id < 1) {
-    http_response_code(404);
-    die("Ticket not found.");
-}
-
-$id = (int) $id;
-
-try {
-    $pdo = new PDO(
-        "mysql:host=localhost;port=3306;dbname=helpdesk;charset=utf8mb4",
-        "comp2245",
-        "comp2245-demo"
-    );
-
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Get existing ticket
-    $stmt = $pdo->prepare("
-        SELECT * FROM tickets WHERE id = ?
-    ");
-
-    $stmt->execute([$id]);
-
-    $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$ticket) {
-        http_response_code(404);
-        die("Ticket not found.");
-    }
-
-    // Get users for assignment dropdown
-    $stmt = $pdo->query("
-        SELECT id, firstname, lastname
-        FROM users
-        ORDER BY firstname, lastname
-    ");
-
-    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-} catch (PDOException $e) {
-    error_log($e->getMessage());
-    die("Something went wrong. Please try again later.");
-}
+require_once __DIR__ . '/includes/bootstrap.php';
+requireLogin();
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+if (!$id || $id < 1) { http_response_code(400); exit('Invalid ticket ID.'); }
+$stmt = $pdo->prepare('SELECT * FROM tickets WHERE id = :id');
+$stmt->execute([':id' => $id]);
+$ticket = $stmt->fetch();
+if (!$ticket) { http_response_code(404); exit('Ticket not found.'); }
+$usersStmt = $pdo->query('SELECT id, firstname, lastname FROM users ORDER BY firstname, lastname');
+$users = $usersStmt->fetchAll();
 
 // Starting form values
 $title = $ticket["title"];
@@ -74,6 +28,12 @@ $errors = [
 
 // Process form
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+        http_response_code(403);
+        exit('Invalid CSRF token. Reload the page and try again.');
+    }
+
 
     $title = trim($_POST["title"] ?? "");
     $description = trim($_POST["description"] ?? "");
@@ -150,23 +110,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         header("Location: ticket.php?id=" . $id);
         exit;
     }
-    function  h($string) {
-        return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
-    }
 }
-require_once 'includes/header.php';
+$pageTitle = 'Edit Ticket';
+require __DIR__ . '/includes/header.php';
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<main>
 
     <div class="form-container">
 
-        <h2>Edit Ticket #<?php echo $id; ?></h2>
+        <h2>Edit Ticket #<?php echo e($id); ?></h2>
 
-        <form method="POST" action="ticket-edit.php?id=<?php echo $id; ?>">
+        <form method="POST" action="ticket-edit.php?id=<?php echo e($id); ?>">
+            <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION["csrf_token"]); ?>">
 
             <div class="field">
                 <label for="title">Title</label>
@@ -176,11 +130,11 @@ require_once 'includes/header.php';
                     id="title"
                     name="title"
                     maxlength="150"
-                    value="<?php echo h($title); ?>"
+                    value="<?php echo e($title); ?>"
                 >
 
                 <?php if ($errors["title"] !== ""): ?>
-                    <p class="error"><?php echo h($errors["title"]); ?></p>
+                    <p class="error"><?php echo e($errors["title"]); ?></p>
                 <?php endif; ?>
             </div>
 
@@ -190,10 +144,10 @@ require_once 'includes/header.php';
                 <textarea
                     id="description"
                     name="description"
-                ><?php echo h($description); ?></textarea>
+                ><?php echo e($description); ?></textarea>
 
                 <?php if ($errors["description"] !== ""): ?>
-                    <p class="error"><?php echo h($errors["description"]); ?></p>
+                    <p class="error"><?php echo e($errors["description"]); ?></p>
                 <?php endif; ?>
             </div>
 
@@ -217,7 +171,7 @@ require_once 'includes/header.php';
                 </select>
 
                 <?php if ($errors["priority"] !== ""): ?>
-                    <p class="error"><?php echo h($errors["priority"]); ?></p>
+                    <p class="error"><?php echo e($errors["priority"]); ?></p>
                 <?php endif; ?>
             </div>
 
@@ -231,10 +185,10 @@ require_once 'includes/header.php';
                     <?php foreach ($users as $user): ?>
 
                         <option
-                            value="<?php echo $user["id"]; ?>"
+                            value="<?php echo e($user["id"]); ?>"
                             <?php if ($assigned_to === (string) $user["id"]) echo "selected"; ?>
                         >
-                            <?php echo h($user["firstname"] . " " . $user["lastname"]); ?>
+                            <?php echo e($user["firstname"] . " " . $user["lastname"]); ?>
                         </option>
 
                     <?php endforeach; ?>
@@ -242,7 +196,7 @@ require_once 'includes/header.php';
                 </select>
 
                 <?php if ($errors["assigned_to"] !== ""): ?>
-                    <p class="error"><?php echo h($errors["assigned_to"]); ?></p>
+                    <p class="error"><?php echo e($errors["assigned_to"]); ?></p>
                 <?php endif; ?>
             </div>
 
@@ -250,7 +204,7 @@ require_once 'includes/header.php';
 
                 <button type="submit">Save Changes</button>
 
-                <a href="ticket.php?id=<?php echo $id; ?>" class="cancel">
+                <a href="ticket.php?id=<?php echo e($id); ?>" class="cancel">
                     Cancel
                 </a>
 
@@ -260,8 +214,4 @@ require_once 'includes/header.php';
 
     </div>
 
-</main>
-
-</body>
-<?php include 'includes/footer.php'; ?>
-</html>
+<?php require __DIR__ . '/includes/footer.php'; ?>

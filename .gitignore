@@ -1,0 +1,9 @@
+# Local database credentials
+/config.php
+
+# Local/editor files
+.env
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
