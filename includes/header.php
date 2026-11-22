@@ -11,7 +11,7 @@ $user = $_SESSION['user'] ?? null;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title><?= e($pageTitle) ?> | Fix-It Desk</title>
-    <script src="app.js" defer></script>
+
     <link rel="stylesheet" href="styles.css">
 
     <meta name="csrf-token"
