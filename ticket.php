@@ -385,8 +385,6 @@ require_once 'includes/header.php';
 
     <a href="index.php">Back to Tickets</a>
 
-    <a href="logout.php">Logout</a>
-
     <main class="ticket-details">
 
         <h2><?php echo escape($ticket['title']); ?></h2>

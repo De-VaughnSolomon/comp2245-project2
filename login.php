@@ -1,5 +1,6 @@
 <?php
-session_start();
+
+require_once __DIR__ . '/includes/bootstrap.php';
 
 $error = "";
 
@@ -10,16 +11,6 @@ if (isset($_SESSION['user_id'])) {
 }
 
 try {
-    $pdo = new PDO(
-        'mysql:host=localhost;port=3306;dbname=helpdesk;charset=utf8mb4',
-        'comp2245',
-        'comp2245-demo',
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ]
-    );
-
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
@@ -48,6 +39,13 @@ try {
                 $_SESSION["lastname"] = $user["lastname"];
                 $_SESSION["email"] = $user["email"];
                 $_SESSION["role"] = $user["role"];
+                $_SESSION["user"] = [
+                    "id" => (int) $user["id"],
+                    "firstname" => $user["firstname"],
+                    "lastname" => $user["lastname"],
+                    "email" => $user["email"],
+                    "role" => $user["role"],
+                ];
 
                 // Go to ticket list
                 header("Location: index.php");
