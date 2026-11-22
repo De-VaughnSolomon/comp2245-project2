@@ -2,6 +2,6 @@
 | Name | GitHub username | What they worked on |
 | --- | --- | --- |
 | Zoe James | zmjames23-star | Database script (schema.sql) |
-| DeVaughn Solomon | De-VaughnSolomon | Login, ,index,logout,ticket(create,edit) and the users page |
+| DeVaughn Solomon | De-VaughnSolomon | Login, index, logout, ticket(create,edit) and the users page |
 | Renael Alfred| Renael758 |CSS                |
 | Trevorn Williams| TrevornWil | API                |
