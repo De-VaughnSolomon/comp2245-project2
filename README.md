@@ -5,3 +5,4 @@
 | DeVaughn Solomon | De-VaughnSolomon | Login, index, logout, ticket(create,edit) and the users page |
 | Renael Alfred| Renael758 |CSS                |
 | Trevorn Williams| TrevornWil | API                |
+|Tyrease Davis| tybdavis19| headers,footers,includes file|
