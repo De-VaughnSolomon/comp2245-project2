@@ -34,9 +34,9 @@
     --info-bg: #e5efff;
     --info-text: #28518c;
     --shadow: 0 8px 24px rgba(31, 42, 68, 0.07);
-    --radius: 10px;
-    --radius-small: 6px;
-    --content-width: 1180px;
+    --radius: 0.625rem;
+    --radius-small: 0.375rem;
+    --content-width: 73.75rem;
 }
 
 * {
@@ -44,7 +44,8 @@
 }
 
 html {
-    min-width: 320px;
+    font-size: 100%;
+    min-width: 20rem;
     scroll-behavior: smooth;
 }
 
@@ -53,7 +54,7 @@ body {
     background: var(--page);
     color: var(--text);
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 15px;
+    font-size: 0.9375rem;
     line-height: 1.55;
 }
 
@@ -61,6 +62,11 @@ img,
 svg {
     max-width: 100%;
     height: auto;
+}
+
+pre {
+    max-width: 100%;
+    overflow-x: auto;
 }
 
 a {
@@ -97,46 +103,134 @@ textarea:focus-visible {
 
 /* ---------- 2. Main navigation ---------- */
 
+/* FIX: the site header is one row: brand | links | user name | Log out.
+   Before, the header was not a flex row, so everything stacked and sat
+   flush against the left edge, and the <h1> brand was dark text on navy. */
 header,
 .site-header,
 .navbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.375rem;
+    min-height: 3.625rem;
+    padding: 0.5rem max(1.25rem, calc((100% - var(--content-width)) / 2));
     background: var(--navy);
     color: #fff;
 }
 
-header .nav-inner,
-.site-header .nav-inner,
-.navbar .nav-inner,
+/* Wrapper divs some pages put inside the header.
+   FIX: they used to be forced to 100% width, which pushed "Welcome" and
+   Log out onto a second row. Now they share the row. */
+header > div,
+.site-header > div,
+.navbar > div,
+.nav-inner {
+    display: flex;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.375rem;
+}
+
+/* The wrapper that holds the links grows, so whatever comes after it
+   (Welcome + Log out) is pushed to the right end */
+header > div:has(nav),
+header > div:has(ul),
+.site-header > div:has(nav),
+.navbar > div:has(nav),
+.nav-inner {
+    flex: 1 1 auto;
+}
+
+/* The last thing in the header (the Log out form, or the box that holds
+   Welcome + Log out) always sits at the far right */
+header > :last-child:not(nav),
+.site-header > :last-child:not(nav),
+.navbar > :last-child:not(nav) {
+    margin-left: auto;
+}
+
+/* If the page puts "Welcome" and Log out inside the <nav>, push them right too */
+nav > :is(p, span, .current-user, .user-name) {
+    margin-left: auto;
+}
+
+/* Brand ("Fix-It Desk"): force white, even when it is an <h1> */
+header h1,
+header h2,
+header h3,
+.site-header h1,
+.navbar h1,
+.brand,
+.site-title,
+.nav-brand {
+    margin: 0;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+header h1 a,
+.brand a,
+.site-title a,
+.nav-brand a {
+    color: #fff;
+    font-size: inherit;
+    text-decoration: none;
+}
+
+/* Links: Tickets | New ticket | Users */
 nav {
     display: flex;
     align-items: center;
-    gap: 22px;
-}
-
-header,
-.site-header,
-.navbar {
-    min-height: 58px;
-}
-
-nav {
-    width: min(100% - 32px, var(--content-width));
-    min-height: 58px;
+    gap: 1.375rem;
+    width: min(100% - 2rem, var(--content-width));
+    min-height: 3.625rem;
     margin: 0 auto;
 }
 
+header nav,
+.site-header nav,
+.navbar nav {
+    flex: 1 1 auto;
+    width: auto;
+    min-height: 0;
+    margin: 0;
+}
+
+/* FIX: nav links often sit in a <ul>, which added the stray left indent */
+nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.375rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+nav li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
 nav a,
-header nav a,
+header a,
 .site-header a,
 .navbar a {
     color: #f7f7ff;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 700;
     text-decoration: none;
 }
 
 nav a:hover,
-header nav a:hover,
+header a:hover,
 .site-header a:hover,
 .navbar a:hover {
     color: #d9d5ff;
@@ -151,36 +245,72 @@ nav a[aria-current="page"],
     text-underline-offset: 6px;
 }
 
-.brand,
-.site-title,
-.nav-brand {
-    margin-right: 6px;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: -0.2px;
-    white-space: nowrap;
-}
-
 .nav-spacer {
     flex: 1;
 }
 
+/* "Welcome, Admin User" */
+header > p,
+header > span,
+.site-header > p,
+.site-header > span,
+.navbar > p,
+.navbar > span,
 .current-user,
 .user-name,
 .logged-in-user {
-    margin-left: auto;
+    margin: 0 0 0 auto;
     color: #e5e4f5;
-    font-size: 12px;
+    font-size: 0.8125rem;
 }
 
+/* FIX: Log out is an outlined button, not a big purple block */
+header form,
+.site-header form,
+.navbar form {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    margin: 0;
+}
+
+header > p,
+header > span,
+header > div > p,
+header > div > span {
+    white-space: nowrap;
+}
+
+header button,
+header .btn,
+header input[type="submit"],
+.site-header button,
+.navbar button,
 nav .logout,
 .logout-button,
 a.logout {
-    padding: 6px 12px;
+    min-height: 2rem;
+    padding: 0.375rem 0.75rem;
     border: 1px solid rgba(255, 255, 255, 0.55);
     border-radius: var(--radius-small);
+    background: transparent;
     color: #fff;
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+header button:hover,
+header .btn:hover,
+header input[type="submit"]:hover,
+.site-header button:hover,
+.navbar button:hover,
+nav .logout:hover,
+.logout-button:hover,
+a.logout:hover {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    text-decoration: none;
 }
 
 /* ---------- 3. Page layout and headings ---------- */
@@ -189,9 +319,9 @@ main,
 .main-content,
 .container,
 .page-container {
-    width: min(100% - 40px, var(--content-width));
+    width: min(100% - 2.5rem, var(--content-width));
     margin: 0 auto;
-    padding: 28px 0 48px;
+    padding: 1.75rem 0 3rem;
 }
 
 h1,
@@ -204,23 +334,23 @@ h4 {
 }
 
 h1 {
-    margin-bottom: 20px;
-    font-size: clamp(25px, 3vw, 31px);
+    margin-bottom: 1.25rem;
+    font-size: clamp(1.5625rem, 3vw, 1.9375rem);
     letter-spacing: -0.6px;
 }
 
 h2 {
-    margin-bottom: 16px;
-    font-size: 21px;
+    margin-bottom: 1rem;
+    font-size: 1.3125rem;
 }
 
 h3 {
-    margin-bottom: 12px;
-    font-size: 17px;
+    margin-bottom: 0.75rem;
+    font-size: 1.0625rem;
 }
 
 p {
-    margin: 0 0 14px;
+    margin: 0 0 0.875rem;
 }
 
 .muted,
@@ -236,8 +366,8 @@ small,
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 18px;
+    gap: 1rem;
+    margin-bottom: 1.125rem;
 }
 
 .page-heading h1,
@@ -247,8 +377,8 @@ small,
 
 .back-link {
     display: inline-block;
-    margin-bottom: 14px;
-    font-size: 13px;
+    margin-bottom: 0.875rem;
+    font-size: 0.8125rem;
 }
 
 /* ---------- 4. Panels, cards and columns ---------- */
@@ -260,7 +390,7 @@ small,
 .details-card,
 .notes-card {
     min-width: 0;
-    padding: 20px;
+    padding: 1.25rem;
     border: 1px solid #e7ebef;
     border-radius: var(--radius);
     background: var(--surface);
@@ -269,7 +399,7 @@ small,
 
 .card + .card,
 .panel + .panel {
-    margin-top: 18px;
+    margin-top: 1.125rem;
 }
 
 .content-grid,
@@ -277,9 +407,9 @@ small,
 .users-layout,
 .two-column {
     display: grid;
-    grid-template-columns: minmax(0, 1.8fr) minmax(260px, 1fr);
+    grid-template-columns: minmax(0, 1.8fr) minmax(16.25rem, 1fr);
     align-items: start;
-    gap: 22px;
+    gap: 1.375rem;
 }
 
 .ticket-layout .main-column,
@@ -289,29 +419,29 @@ small,
 
 .login-page {
     display: flex;
-    min-height: calc(100vh - 58px);
+    min-height: calc(100vh - 3.625rem);
     align-items: center;
     justify-content: center;
-    padding: 36px 20px;
+    padding: 2.25rem 1.25rem;
 }
 
 .login-wrap {
     width: 100%;
-    max-width: 390px;
+    max-width: 24.375rem;
 }
 
 .login-heading {
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
     text-align: center;
 }
 
 .login-heading h1 {
-    margin-bottom: 5px;
+    margin-bottom: 0.3125rem;
     color: var(--navy);
 }
 
 .login-card {
-    padding: 24px;
+    padding: 1.5rem;
     border: 1px solid #e7ebef;
     border-radius: var(--radius);
     background: var(--surface);
@@ -328,20 +458,20 @@ form {
 .form-row,
 .field {
     min-width: 0;
-    margin-bottom: 16px;
+    margin-bottom: 1rem;
 }
 
 .form-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    gap: 0.875rem;
 }
 
 label {
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: 0.375rem;
     color: #344054;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 700;
 }
 
@@ -350,8 +480,8 @@ select,
 textarea {
     display: block;
     width: 100%;
-    min-height: 42px;
-    padding: 9px 11px;
+    min-height: 2.625rem;
+    padding: 0.5625rem 0.6875rem;
     border: 1px solid #cbd2da;
     border-radius: var(--radius-small);
     background: #fff;
@@ -360,7 +490,7 @@ textarea {
 }
 
 textarea {
-    min-height: 130px;
+    min-height: 8.125rem;
     resize: vertical;
 }
 
@@ -388,29 +518,29 @@ textarea[aria-invalid="true"],
 .error-text,
 .error-message {
     display: block;
-    margin-top: 5px;
+    margin-top: 0.3125rem;
     color: var(--danger);
-    font-size: 12px;
+    font-size: 0.75rem;
 }
 
 .field-help,
 .help-text {
     display: block;
-    margin-top: 5px;
-    font-size: 12px;
+    margin-top: 0.3125rem;
+    font-size: 0.75rem;
 }
 
 .form-actions {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 18px;
+    gap: 0.625rem;
+    margin-top: 1.125rem;
 }
 
 .form-actions a,
 .cancel-link {
-    font-size: 13px;
+    font-size: 0.8125rem;
 }
 
 /* ---------- 6. Buttons ---------- */
@@ -421,16 +551,16 @@ input[type="submit"],
 input[type="button"],
 .button {
     display: inline-flex;
-    min-height: 38px;
+    min-height: 2.375rem;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    padding: 8px 14px;
+    gap: 0.4375rem;
+    padding: 0.5rem 0.875rem;
     border: 1px solid transparent;
     border-radius: var(--radius-small);
     background: var(--purple);
     color: #fff;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 700;
     line-height: 1.2;
     text-align: center;
@@ -485,9 +615,9 @@ button.danger:hover,
 
 .btn-small,
 button.small {
-    min-height: 31px;
-    padding: 6px 10px;
-    font-size: 12px;
+    min-height: 1.9375rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
 }
 
 button:disabled,
@@ -503,21 +633,21 @@ button:disabled,
 .tabs {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin: 0 0 10px;
+    gap: 0.5rem;
+    margin: 0 0 0.625rem;
 }
 
 .filters button,
 .filter-buttons button,
 .tabs a,
 .tabs button {
-    min-height: 32px;
-    padding: 6px 13px;
+    min-height: 2rem;
+    padding: 0.375rem 0.8125rem;
     border: 1px solid #d9dce7;
-    border-radius: 20px;
+    border-radius: 1.25rem;
     background: #fff;
     color: #414765;
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 700;
     text-decoration: none;
 }
@@ -542,9 +672,9 @@ button:disabled,
 
 .result-count,
 .ticket-count {
-    margin: 0 0 12px;
+    margin: 0 0 0.75rem;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 0.75rem;
 }
 
 .table-wrap {
@@ -559,12 +689,12 @@ table {
     width: 100%;
     border-collapse: collapse;
     background: #fff;
-    font-size: 13px;
+    font-size: 0.8125rem;
 }
 
 th,
 td {
-    padding: 11px 12px;
+    padding: 0.6875rem 0.75rem;
     border-bottom: 1px solid #e9edf1;
     text-align: left;
     vertical-align: middle;
@@ -573,7 +703,7 @@ td {
 th {
     background: #f7f9fb;
     color: #596477;
-    font-size: 11px;
+    font-size: 0.6875rem;
     font-weight: 800;
     letter-spacing: 0.25px;
     white-space: nowrap;
@@ -591,9 +721,14 @@ td a {
     font-weight: 700;
 }
 
+td,
+th {
+    overflow-wrap: anywhere;
+}
+
 .empty-state,
 .no-results {
-    padding: 28px 16px;
+    padding: 1.75rem 1rem;
     color: var(--muted);
     text-align: center;
 }
@@ -605,11 +740,11 @@ td a {
 .priority,
 .tag {
     display: inline-block;
-    padding: 3px 9px;
-    border-radius: 20px;
+    padding: 0.1875rem 0.5625rem;
+    border-radius: 1.25rem;
     background: #edf0f4;
     color: #4d5868;
-    font-size: 11px;
+    font-size: 0.6875rem;
     font-weight: 800;
     line-height: 1.4;
     white-space: nowrap;
@@ -656,7 +791,7 @@ td a {
 /* ---------- 9. Ticket detail and notes ---------- */
 
 .ticket-title {
-    margin-bottom: 18px;
+    margin-bottom: 1.125rem;
 }
 
 .ticket-number {
@@ -664,7 +799,7 @@ td a {
 }
 
 .ticket-description {
-    padding: 16px;
+    padding: 1rem;
     border: 1px solid #e6eaef;
     border-radius: var(--radius);
     background: #fff;
@@ -679,9 +814,9 @@ td a {
 .ticket-meta div,
 .details-list div {
     display: grid;
-    grid-template-columns: minmax(95px, 0.8fr) minmax(0, 1.2fr);
-    gap: 10px;
-    padding: 7px 0;
+    grid-template-columns: minmax(5.9375rem, 0.8fr) minmax(0, 1.2fr);
+    gap: 0.625rem;
+    padding: 0.4375rem 0;
     border-bottom: 1px solid #edf0f3;
 }
 
@@ -693,26 +828,26 @@ td a {
 .ticket-meta dt,
 .details-list dt {
     color: var(--muted);
-    font-size: 12px;
+    font-size: 0.75rem;
 }
 
 .ticket-meta dd,
 .details-list dd {
     margin: 0;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 700;
     overflow-wrap: anywhere;
 }
 
 .notes-list {
     display: grid;
-    gap: 10px;
-    margin: 0 0 18px;
+    gap: 0.625rem;
+    margin: 0 0 1.125rem;
 }
 
 .note,
 .note-item {
-    padding: 12px 14px;
+    padding: 0.75rem 0.875rem;
     border: 1px solid #e8ebf0;
     border-left: 3px solid #7062df;
     border-radius: 0 var(--radius-small) var(--radius-small) 0;
@@ -725,10 +860,10 @@ td a {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 8px;
-    margin-bottom: 5px;
+    gap: 0.5rem;
+    margin-bottom: 0.3125rem;
     color: var(--muted);
-    font-size: 11px;
+    font-size: 0.6875rem;
 }
 
 .note-author {
@@ -739,8 +874,218 @@ td a {
 .note p,
 .note-item p {
     margin: 0;
-    font-size: 13px;
+    font-size: 0.8125rem;
     white-space: pre-wrap;
+}
+
+/* ---------- 9b. Fixes for the ticket page, notes and links ---------- */
+
+/* FIX: notes. A <header> (or any heading) inside a note must not pick up
+   the navy site-header styles, and nothing inside a note may add its own
+   indent or blank space. */
+.note header,
+.note-item header,
+.notes-card header {
+    display: block;
+    min-height: 0;
+    padding: 0;
+    background: none;
+    color: inherit;
+}
+
+.notes-list,
+ul.notes,
+ol.notes {
+    margin-top: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.note,
+.note-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.1875rem 0.625rem;
+    margin: 0 0 0.625rem;
+    list-style: none;
+}
+
+.notes-list > .note,
+.notes-list > .note-item {
+    margin: 0;
+}
+
+.note > *,
+.note-item > * {
+    margin: 0;
+    padding: 0;
+    float: none;
+    position: static;
+    text-align: left;
+    text-indent: 0;
+}
+
+.note img,
+.note svg,
+.note-item img,
+.note-item svg {
+    flex: none;
+    width: 1.125rem;
+    height: 1.125rem;
+}
+
+/* Order inside a note: author, time, then the note text */
+.note-meta,
+.note-header {
+    flex: 1 1 100%;
+    order: 1;
+    margin-bottom: 0;
+}
+
+.note-author,
+.note > strong,
+.note-item > strong {
+    order: 1;
+    color: var(--text);
+    font-size: 0.8125rem;
+    font-weight: 800;
+}
+
+.note > time,
+.note > small,
+.note > .muted,
+.note-item > time,
+.note-item > small,
+.note-item > .muted,
+.note-date,
+.note-time,
+.note-timestamp,
+.timestamp {
+    order: 2;
+    color: var(--muted);
+    font-size: 0.6875rem;
+}
+
+.note > p,
+.note > .note-body,
+.note > .note-text,
+.note > .note-content,
+.note-item > p,
+.note-item > .note-body,
+.note-item > .note-text,
+.note-item > .note-content {
+    order: 3;
+    flex: 1 1 100%;
+    font-size: 0.8125rem;
+    white-space: pre-wrap;
+}
+
+/* FIX: the "Add a note" form is a card with space above it, like the
+   other panels (it was bare text jammed under the last note). */
+.note-form,
+.add-note,
+.add-note-form,
+#note-form,
+#add-note-form,
+form[id*="note"],
+form[action*="note"],
+form:has(textarea[name="body"]),
+form:has(textarea[name="note"]) {
+    margin-top: 1.125rem;
+    padding: 1.25rem;
+    border: 1px solid #e7ebef;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.note-form h2,
+.note-form h3,
+.note-form h4,
+.add-note h2,
+.add-note h3,
+.add-note h4,
+.note-form label,
+.add-note label {
+    margin: 0 0 0.5rem;
+    font-size: 0.9375rem;
+}
+
+.note + :is(h2, h3, h4),
+.note-item + :is(h2, h3, h4),
+.notes-list + :is(h2, h3, h4) {
+    margin-top: 1.5rem;
+}
+
+form:has(textarea[name="body"]) .btn,
+form:has(textarea[name="body"]) button,
+.note-form button,
+.add-note button {
+    margin-top: 0.75rem;
+}
+
+/* FIX: the "New ticket" link next to the Tickets heading is a button on
+   the right of the heading row. */
+a[href*="ticket-new"]:not(nav a):not(header a) {
+    display: inline-flex;
+    min-height: 2.375rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.875rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-small);
+    background: var(--purple);
+    color: #fff;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+}
+
+a[href*="ticket-new"]:not(nav a):not(header a):hover {
+    background: var(--purple-dark);
+    color: #fff;
+}
+
+/* Puts the heading and its "New ticket" button on one row, whatever
+   wrapper they sit in. Everything else in that wrapper stays full width. */
+:is(main, section, article, div):has(> :is(h1, h2) + a[href*="ticket-new"]) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+}
+
+:is(main, section, article, div):has(> :is(h1, h2) + a[href*="ticket-new"]) > * {
+    flex: 0 0 100%;
+}
+
+:is(main, section, article, div):has(> :is(h1, h2) + a[href*="ticket-new"]) > :is(h1, h2):has(+ a[href*="ticket-new"]) {
+    flex: 1 1 0;
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+:is(main, section, article, div):has(> :is(h1, h2) + a[href*="ticket-new"]) > a[href*="ticket-new"] {
+    flex: 0 0 auto;
+}
+
+/* FIX: "Back to Tickets" is a small link with space under it, not a
+   large bare link. */
+.back-link,
+a[href$="index.php"]:not(nav a):not(header a):not(.form-actions a):not(.btn):not(.button):not(.cancel-link),
+a[href="/"]:not(nav a):not(header a):not(.form-actions a):not(.btn):not(.button) {
+    display: inline-block;
+    margin-bottom: 0.875rem;
+    font-size: 0.8125rem;
+}
+
+/* FIX: the hidden attribute must win over the button display rules, so
+   "Assign to me" really disappears when it should. */
+[hidden] {
+    display: none !important;
 }
 
 /* ---------- 10. Alerts and confirmation messages ---------- */
@@ -748,11 +1093,11 @@ td a {
 .alert,
 .message,
 .notice {
-    margin: 0 0 16px;
-    padding: 11px 14px;
+    margin: 0 0 1rem;
+    padding: 0.6875rem 0.875rem;
     border: 1px solid transparent;
     border-radius: var(--radius-small);
-    font-size: 13px;
+    font-size: 0.8125rem;
 }
 
 .alert-success,
@@ -789,7 +1134,7 @@ td a {
 
 .confirmation,
 .confirm-delete {
-    padding: 14px;
+    padding: 0.875rem;
     border: 1px solid #f0c5c9;
     border-radius: var(--radius);
     background: var(--danger-bg);
@@ -797,8 +1142,10 @@ td a {
 
 /* ---------- 11. Users page ---------- */
 
+/* FIX: no forced minimum width. A fixed min-width made the table wider
+   than a phone and pushed the whole page sideways. */
 .users-table {
-    min-width: 560px;
+    min-width: 0;
 }
 
 .add-user-card {
@@ -818,32 +1165,61 @@ td a {
 
 footer,
 .site-footer {
-    padding: 18px 20px;
+    padding: 1.125rem 1.25rem;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 0.75rem;
     text-align: center;
 }
 
 /* ---------- 13. Responsive layout ---------- */
 
-@media (max-width: 760px) {
+@media (max-width: 47.5em) {
     nav {
-        width: min(100% - 24px, var(--content-width));
+        width: min(100% - 1.5rem, var(--content-width));
         flex-wrap: wrap;
-        gap: 10px 15px;
-        padding: 10px 0;
+        gap: 0.625rem 0.9375rem;
+        padding: 0.625rem 0;
     }
 
+    header,
+    .site-header,
+    .navbar {
+        padding: 0.625rem 0.875rem;
+        gap: 0.5rem 0.875rem;
+    }
+
+    header h1,
     .brand,
     .site-title,
     .nav-brand {
-        width: 100%;
+        flex: 1 1 auto;
         margin-right: 0;
+    }
+
+    header > div:has(nav),
+    header > div:has(ul),
+    .nav-inner {
+        flex: 1 1 100%;
+    }
+
+    header > :last-child:not(nav) {
+        margin-left: auto;
+    }
+
+    /* Links drop onto their own row under the brand and Log out */
+    header nav,
+    .site-header nav,
+    .navbar nav {
+        flex: 1 1 100%;
+        order: 3;
+        padding: 0;
     }
 
     .current-user,
     .user-name,
-    .logged-in-user {
+    .logged-in-user,
+    header > p,
+    header > span {
         margin-left: 0;
     }
 
@@ -851,8 +1227,8 @@ footer,
     .main-content,
     .container,
     .page-container {
-        width: min(100% - 28px, var(--content-width));
-        padding-top: 22px;
+        width: min(100% - 1.75rem, var(--content-width));
+        padding-top: 1.375rem;
     }
 
     .content-grid,
@@ -868,40 +1244,79 @@ footer,
         align-items: flex-start;
     }
 
+    /* FIX: tables (tickets and users) stay inside the screen on phones.
+       The table scrolls sideways inside its own box if it still needs
+       more room, so the page itself never scrolls sideways. */
     .table-wrap {
+        max-width: 100%;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
 
-    table {
-        min-width: 680px;
+    table,
+    .users-table {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        font-size: 0.75rem;
     }
 
-    .users-table {
-        min-width: 560px;
+    th,
+    td {
+        padding: 0.5rem 0.55rem;
+    }
+
+    th {
+        white-space: normal;
+    }
+
+    td .badge,
+    td .status,
+    td .priority,
+    td .tag {
+        padding: 0.15rem 0.5rem;
+        font-size: 0.6875rem;
+    }
+
+    /* Nothing inside the page may be wider than the screen */
+    main,
+    .main-content,
+    .container,
+    .page-container,
+    .card,
+    .panel,
+    .form-card,
+    .ticket-card,
+    .details-card,
+    .notes-card {
+        min-width: 0;
+        max-width: 100%;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 30em) {
     body {
-        font-size: 14px;
+        font-size: 0.875rem;
     }
 
     main,
     .main-content,
     .container,
     .page-container {
-        width: calc(100% - 24px);
-        padding-top: 18px;
-        padding-bottom: 30px;
+        width: calc(100% - 1.5rem);
+        padding-top: 1.125rem;
+        padding-bottom: 1.875rem;
     }
 
     h1 {
-        font-size: 25px;
+        font-size: 1.5625rem;
     }
 
     h2 {
-        font-size: 19px;
+        font-size: 1.1875rem;
     }
 
     .page-heading,
@@ -909,7 +1324,7 @@ footer,
     .toolbar {
         flex-direction: column;
         align-items: stretch;
-        gap: 12px;
+        gap: 0.75rem;
     }
 
     .page-heading .btn,
@@ -925,7 +1340,7 @@ footer,
     .details-card,
     .notes-card,
     .login-card {
-        padding: 15px;
+        padding: 0.9375rem;
     }
 
     .form-row {
@@ -944,13 +1359,13 @@ footer,
 
     .ticket-meta div,
     .details-list div {
-        grid-template-columns: 100px minmax(0, 1fr);
+        grid-template-columns: 6.25rem minmax(0, 1fr);
     }
 
     .filters,
     .filter-buttons,
     .tabs {
-        gap: 6px;
+        gap: 0.375rem;
     }
 
     .filters button,
@@ -961,17 +1376,55 @@ footer,
     }
 
     nav {
-        gap: 9px 12px;
+        gap: 0.5625rem 0.75rem;
     }
 
     nav a {
-        font-size: 12px;
+        font-size: 0.75rem;
     }
 
     .login-page {
-        min-height: calc(100vh - 50px);
-        padding: 24px 12px;
+        min-height: calc(100vh - 3.125rem);
+        padding: 1.5rem 0.75rem;
     }
+}
+.ticket-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.ticket-nav {
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    color: #fff;
+    transition: background 0.2s ease;
+}
+
+.back-button {
+    background: #555;
+}
+
+.back-button:hover {
+    background: #333;
+    color: #fff;
+}
+
+.edit-button {
+    background: var(--purple);
+}
+
+.edit-button:hover {
+    background: var(--purple-dark);
+    color: #fff;
+}
+
+.ticket-nav:focus-visible {
+    outline: 3px solid var(--purple-light);
+    outline-offset: 3px;
 }
 
 /* Respect users who prefer reduced motion. */
